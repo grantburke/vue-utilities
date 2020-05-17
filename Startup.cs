@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using vue_utilities.Models;
 using VueCliMiddleware;
 
 namespace vue_utilities
@@ -23,6 +25,8 @@ namespace vue_utilities
         {
 
             services.AddControllersWithViews();
+            services.AddDbContext<UsersContext>(opts =>
+                opts.UseSqlite("Filename=UsersContext.db"));
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -37,6 +41,7 @@ namespace vue_utilities
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                SeedData.Initialize(app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider);
             }
             else
             {
