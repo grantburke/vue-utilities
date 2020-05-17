@@ -50,6 +50,12 @@ namespace vue_utilities
                 app.UseHsts();
             }
 
+            app.UseCors(opts => {
+                opts.AllowAnyOrigin();
+                opts.AllowAnyMethod();
+                opts.AllowAnyHeader();
+            });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
@@ -63,15 +69,15 @@ namespace vue_utilities
                     pattern: "{controller}/{action=Index}/{id?}");
             });
 
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
+            // app.UseSpa(spa =>
+            // {
+            //     spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseVueCli(npmScript: "dev");
-                }
-            });
+            //     if (env.IsDevelopment())
+            //     {
+            //         spa.UseVueCli(npmScript: "dev");
+            //     }
+            // });
         }
     }
 }

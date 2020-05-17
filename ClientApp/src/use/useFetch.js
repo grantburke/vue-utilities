@@ -1,7 +1,7 @@
 import { toRefs, reactive } from "vue";
 
 export default function useFetch() {
-  const baseUrl = "https://api.openbrewerydb.org";
+  const baseUrl = "http://localhost:5000/api";
   const state = reactive({
     response: [],
     error: null,
