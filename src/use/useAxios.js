@@ -1,19 +1,19 @@
 import { toRefs, reactive } from "vue";
+import axios from "axios";
 
-export default function useFetch() {
-  const baseUrl = "https://api.openbrewerydb.org";
+export default function useFetch(baseURL) {
+  const axiosClient = axios.create({ baseURL });
   const state = reactive({
     response: [],
     error: null,
     fetching: false,
   });
 
-  const fetchData = async (route, config) => {
+  const fetchData = async (config) => {
     try {
       state.fetching = true;
-      const res = await fetch(`${baseUrl}/${route}`, config);
-      const json = await res.json();
-      state.response = json;
+      const res = await axiosClient(config);
+      state.response = res.data;
     } catch (error) {
       state.error = error;
     } finally {

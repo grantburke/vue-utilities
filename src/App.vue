@@ -19,26 +19,28 @@
           <td>{{ b.state }}</td>
         </tr>
       </tbody>
+      <tfooter id="pagination">
+        <button type="button" @click="prevPage">Prev</button>
+        <button type="button" @click="nextPage">Next</button>
+        <div>
+          Page: {{ page }}
+          | Limit
+          <select v-model="limit">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          | <input type="text" v-model="city" placeholder="Filter by city..." />
+        </div>
+      </tfooter>
     </table>
-    <div id="pagination">
-      <button type="button" @click="prevPage">Prev</button>
-      <button type="button" @click="nextPage">Next</button>
-      <div>
-        Page: {{ page }} | Limit
-        <select v-model="limit">
-          <option value="10" selected>10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
-        | <input type="text" v-model="city" placeholder="Filter by city..." />
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import { ref, watch, computed } from "vue";
 import useFetch from "./use/useFetch";
+import useAxios from "./use/useAxios";
 export default {
   setup() {
     let breweries = [];
@@ -48,12 +50,15 @@ export default {
     const city = ref("");
     const cityUrl = computed(() => encodeURI(city.value));
 
-    const { response, error, fetching, fetchData } = useFetch();
+    // const { response, error, fetching, fetchData } = useFetch();
+    const { response, error, fetching, fetchData } = useAxios(
+      "https://api.openbrewerydb.org"
+    );
     watch(() => {
-      fetchData(
-        `/breweries?page=${page.value}&per_page=${limit.value}&by_city=${city.value}`,
-        {}
-      );
+      fetchData({
+        method: "get",
+        url: `/breweries?page=${page.value}&per_page=${limit.value}&by_city=${city.value}`,
+      });
       breweries = response;
     });
 
