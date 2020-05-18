@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -23,12 +24,24 @@ namespace vue_utilities.Controllers
         }
 
         [HttpGet]
-        public UsersResponse Get(int page, int per_page, string search)
+        public UsersResponse Get(int page, int per_page, string search, string sort_column, string sort_direction)
         {
             var usersTotal = _db.Users.Count();
-            var users = _db.Users
-                .Skip((page - 1) * per_page)
-                .Take(per_page);
+            IEnumerable<User> users;
+
+            if (string.IsNullOrEmpty(sort_column))
+            {
+                users = _db.Users
+                    .Skip((page - 1) * per_page)
+                    .Take(per_page);
+            }
+            else
+            {
+                users = _db.Users
+                    .OrderBy($"{sort_column} {sort_direction}")
+                    .Skip((page - 1) * per_page)
+                    .Take(per_page);
+            }
             
             if (string.IsNullOrEmpty(search)) return new UsersResponse { Users = users, UsersTotal = usersTotal };
 

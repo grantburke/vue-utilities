@@ -5,12 +5,12 @@
     <table>
       <thead>
         <tr>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>State</th>
-          <th>Zip</th>
+          <th @click="sort('firstName')">First Name</th>
+          <th @click="sort('lastName')">Last Name</th>
+          <th @click="sort('address')">Address</th>
+          <th @click="sort('city')">City</th>
+          <th @click="sort('state')">State</th>
+          <th @click="sort('zip')">Zip</th>
         </tr>
       </thead>
       <tbody v-if="usersInfo">
@@ -82,6 +82,8 @@ export default {
 
     const search = ref("");
     const searchUrl = computed(() => encodeURI(search.value));
+    const sortColumn = ref("");
+    const sortDirection = ref("");
 
     // const { response, error, fetching, fetchData } = useFetch();
     // watch(() => {
@@ -96,11 +98,18 @@ export default {
     watch(() => {
       fetchData({
         method: "get",
-        url: `/users?page=${page.value}&per_page=${limit.value}&search=${search.value}`,
+        url: `/users?page=${page.value}&per_page=${limit.value}&search=${search.value}&sort_column=${sortColumn.value}&sort_direction=${sortDirection.value}`,
       });
       usersInfo = response;
     });
 
+    const sort = (column) => {
+      if (column == sortColumn.value)
+        sortDirection.value =
+          sortDirection.value == "ascending" ? "descending" : "ascending";
+      else sortDirection.value = "ascending";
+      sortColumn.value = column;
+    };
     const nextPage = () => (page.value += 1);
     const disableNext = computed(() => page.value + 1 > totalPages.value);
     const prevPage = () => (page.value -= 1);
@@ -110,6 +119,7 @@ export default {
       usersInfo,
       error,
       fetching,
+      sort,
       nextPage,
       disableNext,
       prevPage,
