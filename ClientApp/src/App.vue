@@ -13,8 +13,8 @@
           <th>Zip</th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="u in users" :key="u.id">
+      <tbody v-if="usersInfo">
+        <tr v-for="u in usersInfo.users" :key="u.id">
           <td>{{ u.firstName }}</td>
           <td>{{ u.lastName }}</td>
           <td>{{ u.address }}</td>
@@ -24,7 +24,16 @@
         </tr>
       </tbody>
       <tfooter id="pagination">
-        <button type="button" @click="prevPage">Prev</button>
+        <button type="button" @click="prevPage">Prev</button> |
+        <button
+          type="button"
+          v-for="n in numberOfPages"
+          :key="n"
+          @click="goToPage(n)"
+        >
+          {{ n }}
+        </button>
+        |
         <button type="button" @click="nextPage">Next</button>
         <div>
           Page: {{ page }}
@@ -42,15 +51,17 @@
 </template>
 
 <script>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, reactive } from "vue";
 // import useFetch from "./use/useFetch";
 import useAxios from "./use/useAxios";
 export default {
   setup() {
-    let breweries = [];
-    let users = [];
+    let usersInfo = reactive(null);
     const page = ref(1);
     const limit = ref(10);
+    const numberOfPages = computed(
+      () => usersInfo.value.usersTotal / limit.value || 0
+    );
 
     const search = ref("");
     const searchUrl = computed(() => encodeURI(search.value));
@@ -70,17 +81,20 @@ export default {
         method: "get",
         url: `/users?page=${page.value}&per_page=${limit.value}&search=${search.value}`,
       });
-      users = response;
+      usersInfo = response;
     });
 
     const nextPage = () => (page.value += 1);
     const prevPage = () => (page.value -= 1);
+    const goToPage = (n) => (page.value = n);
     return {
-      users,
+      usersInfo,
       error,
       fetching,
       nextPage,
       prevPage,
+      goToPage,
+      numberOfPages,
       page,
       limit,
       search,

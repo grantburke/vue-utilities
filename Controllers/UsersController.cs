@@ -23,22 +23,30 @@ namespace vue_utilities.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<User> Get(int page, int per_page, string search)
+        public UsersResponse Get(int page, int per_page, string search)
         {
+            var usersTotal = _db.Users.Count();
             var users = _db.Users
                 .Skip((page - 1) * per_page)
                 .Take(per_page);
             
-            if (string.IsNullOrEmpty(search)) return users;
+            if (string.IsNullOrEmpty(search)) return new UsersResponse { Users = users, UsersTotal = usersTotal };
 
             search = search.ToLower();
 
-            return users.Where(w => w.FirstName.ToLower().Contains(search) ||
-                                    w.LastName.ToLower().Contains(search) ||
-                                    w.Address.ToLower().Contains(search) ||
-                                    w.City.ToLower().Contains(search) ||
-                                    w.State.ToLower().Contains(search) ||
-                                    w.Zip.ToLower().Contains(search));
+            return new UsersResponse { Users = users.Where(w => w.FirstName.ToLower().Contains(search) ||
+                                                           w.LastName.ToLower().Contains(search) ||
+                                                           w.Address.ToLower().Contains(search) ||
+                                                           w.City.ToLower().Contains(search) ||
+                                                           w.State.ToLower().Contains(search) ||
+                                                           w.Zip.ToLower().Contains(search)),
+                                       UsersTotal = usersTotal };
         }
+    }
+
+    public class UsersResponse
+    {
+        public IEnumerable<User> Users { get; set; }
+        public int UsersTotal { get; set; }
     }
 }
