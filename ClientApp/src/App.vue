@@ -24,17 +24,22 @@
         </tr>
       </tbody>
       <tfooter id="pagination">
-        <button type="button" @click="prevPage">Prev</button> |
+        <button type="button" @click="prevPage" :disabled="disablePrev">
+          Prev
+        </button>
+        |
         <button
           type="button"
-          v-for="n in numberOfPages"
+          v-for="n in btnPageNumbers"
           :key="n"
           @click="goToPage(n)"
         >
           {{ n }}
         </button>
         |
-        <button type="button" @click="nextPage">Next</button>
+        <button type="button" @click="nextPage" :disabled="disableNext">
+          Next
+        </button>
         <div>
           Page: {{ page }}
           | Limit
@@ -59,9 +64,21 @@ export default {
     let usersInfo = reactive(null);
     const page = ref(1);
     const limit = ref(10);
-    const numberOfPages = computed(
+    const totalPages = computed(
       () => usersInfo.value.usersTotal / limit.value || 0
     );
+    const btnPageNumbers = computed(() => {
+      let total = usersInfo.value.usersTotal / limit.value || 0;
+      let start = 1;
+      let end = total;
+
+      if (page.value - 2 <= 0) start = 1;
+      else start = page.value - 2;
+
+      if (start + 4 > total) end = total;
+      else end = start + 4;
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    });
 
     const search = ref("");
     const searchUrl = computed(() => encodeURI(search.value));
@@ -85,16 +102,20 @@ export default {
     });
 
     const nextPage = () => (page.value += 1);
+    const disableNext = computed(() => page.value + 1 > totalPages.value);
     const prevPage = () => (page.value -= 1);
+    const disablePrev = computed(() => page.value - 1 <= 0);
     const goToPage = (n) => (page.value = n);
     return {
       usersInfo,
       error,
       fetching,
       nextPage,
+      disableNext,
       prevPage,
+      disablePrev,
       goToPage,
-      numberOfPages,
+      btnPageNumbers,
       page,
       limit,
       search,
