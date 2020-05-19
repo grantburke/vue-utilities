@@ -43,7 +43,7 @@
         <div>
           Page: {{ page }}
           | Limit
-          <select v-model="limit">
+          <select @change="limitChange($event)">
             <option value="10" selected>10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -57,13 +57,19 @@
 
 <script>
 import { ref, watch, computed, reactive } from "vue";
-// import useFetch from "./use/useFetch";
 import useAxios from "./use/useAxios";
 export default {
   setup() {
     let usersInfo = reactive(null);
     const page = ref(1);
     const limit = ref(10);
+    const limitChange = (e) => {
+      const newLimit = +e.target.value;
+      const newTotalPages = usersInfo.value.usersTotal / newLimit;
+      if (page.value > newTotalPages) page.value = newTotalPages;
+      limit.value = +e.target.value;
+    };
+
     const totalPages = computed(
       () => usersInfo.value.usersTotal / limit.value || 0
     );
@@ -85,13 +91,6 @@ export default {
     const sortColumn = ref("");
     const sortDirection = ref("");
 
-    // const { response, error, fetching, fetchData } = useFetch();
-    // watch(() => {
-    //   fetchData(
-    //     `users?page=${page.value}&per_page=${limit.value}&search=${search.value}`,
-    //     {});
-    //   users = response;
-    // });
     const { response, error, fetching, fetchData } = useAxios(
       "http://localhost:5000/api"
     );
@@ -128,6 +127,7 @@ export default {
       btnPageNumbers,
       page,
       limit,
+      limitChange,
       search,
     };
   },
